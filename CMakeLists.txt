@@ -7,4 +7,4 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(RayTracing main.c)
 
-target_link_libraries(RayTracing SDL2)
+target_link_libraries(RayTracing SDL2 m)
