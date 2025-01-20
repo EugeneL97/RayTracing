@@ -2,12 +2,14 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
-#define WIDTH 900
+#define WIDTH 1200
 #define HEIGHT 600
 #define COLOR_WHITE 0xffffff
 #define COLOR_YELLOW 0xffff00
+#define COLOR_BLUR_YELLOW 0xbd6800
 #define COLOR_BLACK 0x000000
-#define RAYS_NUMBER 100
+#define RAYS_NUMBER 500
+#define RAY_THICKNESS 1
 
 struct Circle {
     double x;
@@ -49,9 +51,10 @@ void GenerateRays(struct Circle circle, struct Ray rays[RAYS_NUMBER])
     }
 }
 
-void FillRays(SDL_Surface* surface, struct Ray rays[RAYS_NUMBER], Uint32 color, struct Circle object)
+void FillRays(SDL_Surface* surface, struct Ray rays[RAYS_NUMBER], Uint32 color, Uint32 blur_color, struct Circle object)
 {
     double radius_squared = pow(object.radius, 2);
+    double blur_size = 1.5 * RAY_THICKNESS;
     for (int i = 0; i < RAYS_NUMBER; ++i)
     {
         struct Ray ray = rays[i];
@@ -67,8 +70,11 @@ void FillRays(SDL_Surface* surface, struct Ray rays[RAYS_NUMBER], Uint32 color, 
             x_draw += step * cos(ray.angle);
             y_draw += step * sin(ray.angle);
 
-            SDL_Rect pixel = (SDL_Rect){x_draw,y_draw,1,1};
-            SDL_FillRect(surface, &pixel, color);
+            SDL_Rect ray_point = (SDL_Rect){x_draw,y_draw,RAY_THICKNESS,RAY_THICKNESS};
+            SDL_Rect ray_blur = (SDL_Rect){x_draw,y_draw,blur_size,blur_size};
+
+            SDL_FillRect(surface, &ray_blur, blur_color);
+            SDL_FillRect(surface, &ray_point, color);
 
             if (x_draw < 0 || x_draw > WIDTH || y_draw < 0 || y_draw > HEIGHT)
             {
@@ -91,7 +97,7 @@ int main(int argc, char* argv[]) {
 
     SDL_Surface* surface = SDL_GetWindowSurface(window);
 
-    struct Circle circle = {200, 200, 80};
+    struct Circle circle = {200, 200, 40};
     struct Circle circle_shadow = {650, 300, 140};
 
     struct Ray rays[RAYS_NUMBER];
@@ -119,13 +125,13 @@ int main(int argc, char* argv[]) {
             }
         }
         SDL_FillRect(surface, NULL, COLOR_BLACK);
-        FillCircle(surface, circle, COLOR_WHITE);
 
+        FillRays(surface, rays, COLOR_YELLOW, COLOR_BLUR_YELLOW, circle_shadow);
+        FillCircle(surface, circle, COLOR_WHITE);
         FillCircle(surface, circle_shadow, COLOR_WHITE);
-        FillRays(surface, rays, COLOR_YELLOW, circle_shadow);
 
         circle_shadow.y += obstacle_speed_y;
-        if (circle_shadow.y + circle_shadow.radius < 0 || circle_shadow.y + circle_shadow.radius > HEIGHT )
+        if (circle_shadow.y - circle_shadow.radius < 0 || circle_shadow.y + circle_shadow.radius > HEIGHT )
         {
             obstacle_speed_y = -obstacle_speed_y;
         }
