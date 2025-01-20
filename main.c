@@ -4,6 +4,8 @@
 #define WIDTH 900
 #define HEIGHT 600
 #define COLOR_WHITE 0xffffff
+#define COLOR_BLACK 0x000000
+
 struct Circle {
     double x;
     double y;
@@ -33,10 +35,13 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = SDL_CreateWindow("Raytracing", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
 
     SDL_Surface* surface = SDL_GetWindowSurface(window);
-    SDL_Rect rect = (SDL_Rect){200,200,200,200};
-    SDL_FillRect(surface, &rect, COLOR_WHITE);
+    // SDL_Rect rect = (SDL_Rect){200,200,200,200};
+    // SDL_FillRect(surface, &rect, COLOR_WHITE);
+
     struct Circle circle = {200, 200, 80};
     struct Circle circle_shadow = {650, 300, 140};
+    SDL_Rect erase_rect = (SDL_Rect){0,0, WIDTH, HEIGHT};
+
     int simulation_running = 1;
     SDL_Event event;
     while (simulation_running)
@@ -53,10 +58,18 @@ int main(int argc, char* argv[]) {
                 circle.y = event.motion.y;
             }
         }
+        SDL_FillRect(surface, &erase_rect, COLOR_BLACK);
         FillCircle(surface, circle, COLOR_WHITE);
         FillCircle(surface, circle_shadow, COLOR_WHITE);
 
-    SDL_UpdateWindowSurface(window);
+        SDL_UpdateWindowSurface(window);
+        SDL_Delay(1000/144);
+    }
 
-    SDL_Delay(2500);
+
+
+    // SDL_DestroyWindow(window);
+    // SDL_Quit();
+    //
+    // return 0;
 }
